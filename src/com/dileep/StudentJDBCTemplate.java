@@ -19,11 +19,22 @@ public class StudentJDBCTemplate implements StudentDAO {
 
 	@Override
 	public void create(String name, Integer age) {
-		String SQL = "insert into STUDENT (name, age) values (?, ?)";
-
-		jdbcTemplateObject.update(SQL, name, age);
-		System.out.println("Created record: Name = " + name + ", Age = " + age);
+		if (!checkForExistance(name)) {
+			String SQL = "insert into STUDENT (name, age) values (?, ?)";
+			jdbcTemplateObject.update(SQL, name, age);
+			System.out.println("Created record: Name = " + name + ", Age = " + age);
+			return;
+		}
 		return;
+	}
+
+	private boolean checkForExistance(String name) {
+		String SQL = "select * from STUDENT where name = ? LIMIT 1";
+		List<Student> student = jdbcTemplateObject.query(SQL, new Object[] { name }, new StudentMapper());
+		if (!student.isEmpty()) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
